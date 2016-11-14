@@ -922,6 +922,24 @@
             <screens/>
         </template>
     </templates>
+    <triggers>
+        <trigger>
+            <expression>{Template_App_Apache_Status:apache.status.last()}=0</expression>
+            <recovery_mode>0</recovery_mode>
+            <recovery_expression/>
+            <name>{HOST.NAME} Apache - Apache is Down</name>
+            <correlation_mode>0</correlation_mode>
+            <correlation_tag/>
+            <url/>
+            <status>0</status>
+            <priority>2</priority>
+            <description/>
+            <type>0</type>
+            <manual_close>0</manual_close>
+            <dependencies/>
+            <tags/>
+        </trigger>
+    </triggers>
     <graphs>
         <graph>
             <name>Apache Stats</name>
@@ -1169,3 +1187,4 @@
         </graph>
     </graphs>
 </zabbix_export>
+
