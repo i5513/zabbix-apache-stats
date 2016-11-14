@@ -358,7 +358,7 @@
                     <publickey/>
                     <privatekey/>
                     <port/>
-                    <description>Item used to trigger zabbix trapper submission by agent.</description>
+                    <description>Item usado para recopilar información a través de zabbix trappers.</description>
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
