@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# https://github.com/gpmidi/zabbix-apache-stats/blob/master/bin/check_apache
 
 """ Fetch Apache stats via mod_status and send to Zabbix 
 By Paulson McIntyre
@@ -43,7 +44,7 @@ def setLogLevel(loglevel):
     logger.setLevel(numeric_loglevel)
 
     log_handler = logging.handlers.SysLogHandler( address = '/dev/log' )
-    #log_handler = logging.StreamHandler(sys.stdout)
+    # log_handler = logging.StreamHandler(sys.stdout)
     logger.addHandler( log_handler )
 
     return logger
@@ -94,13 +95,14 @@ def zabbix_sender(payload, agentconfig = None, zabbixserver = None, zabbixport =
                 logger.error('must specify agent configuration or server name to call zabbix_sender with')
 
         try:
-            p = Popen(sender_command, stdout = PIPE, stdin = PIPE, stderr = PIPE)
-            out, err = p.communicate( input = payload )
-            ret = p.wait()
+            try:
+                p = Popen(sender_command, stdout = PIPE, stdin = PIPE, stderr = PIPE)
+                out, err = p.communicate( input = payload )
+                ret = p.wait()
+            except Exception:
+                t, e = sys.exc_info()[:2]
+                err = "%s\nFailed to execute: '%s'" % (e, " ".join(sender_command))
             result = 1
-
-        except Exception, e:
-          err = "%s\nFailed to execute: '%s'" % (e, " ".join(sender_command))
 
         finally:
             if ret != 0:
@@ -313,12 +315,14 @@ def main():
 
     try:
         server_status = fetchURL(opts.url, user = opts.user, passwd = opts.passwd)
-    except Exception as e:
+    except Exception:
+        t, e = sys.exc_info()[:2]
         zbx_fail('failed to read server-status: %s' % e)
     
     try:
         data = parse( data = server_status, version = opts.statusvers )
-    except Exception as e:
+    except Exception:
+        t, e = sys.exc_info()[:2]
         zbx_fail('failed to parse server-status: %s' % e)
 
     payload = ""
@@ -333,7 +337,8 @@ def main():
                 payload     = payload, 
                 agentconfig = opts.agentconfig, 
                 senderloc   = opts.senderloc )
-        except Exception as e:
+        except Exception:
+            t, e = sys.exc_info()[:2]
             zbx_fail('failed to send parsed data: %s' % e)
         else:
             # return value for apache.status item
@@ -350,10 +355,12 @@ def main():
                 zabbixserver = opts.zabbixserver, 
                 zabbixport   = opts.zabbixport, 
                 senderloc    = opts.senderloc )
-        except Exception as e:
+        except Exception:
+            t, e = sys.exc_info()[:2]
             zbx_fail('failed to send parsed data: %s' % e)
 
 if __name__ == "__main__":
     loglevel = 'debug'
     logger   = setLogLevel(loglevel)
     main()
+
